@@ -1,0 +1,39 @@
+{
+  "name": "@civ-clone/base-trade-rate",
+  "version": "0.1.0",
+  "description": "The wiring that turns a city's trade into the player's trade-rate yields: each player's starting rates, the split, the adjust action and the turn-start processing, for a ruleset to wrap in its own rules.",
+  "repository": "git@github.com:civ-clone/base-trade-rate.git",
+  "keywords": [
+    "typescript",
+    "civilization"
+  ],
+  "author": "dom111 <dom111@users.noreply.github.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "npm run ts:compile && npm run prettier:format",
+    "prettier:check": "prettier --config .prettierrc --check '**/*.ts'",
+    "prettier:format": "prettier --config .prettierrc '**/*.ts' --write",
+    "test": "ts-mocha ./tests/*.test.ts",
+    "ts:compile": "tsc --build tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^16.0.0",
+    "chai": "^4.0.0",
+    "mocha": "^10.0.0",
+    "prettier": "^2.8.8",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^4.0.0"
+  },
+  "dependencies": {
+    "@civ-clone/base-player-action-adjust-trade-rates": "^0.1.1",
+    "@civ-clone/core-city": "^0.1.24",
+    "@civ-clone/core-player": "^0.1.10",
+    "@civ-clone/core-registry": "^0.1.6",
+    "@civ-clone/core-rule": "^0.1.9",
+    "@civ-clone/core-trade-rate": "^0.1.6",
+    "@civ-clone/core-yield": "^0.1.6"
+  }
+}
