@@ -1,6 +1,6 @@
 {
   "name": "@civ-clone/base-trade-rate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The wiring that turns a city's trade into the player's trade-rate yields: each player's starting rates, the split, the adjust action and the turn-start processing, for a ruleset to wrap in its own rules.",
   "repository": "git@github.com:civ-clone/base-trade-rate.git",
   "keywords": [
