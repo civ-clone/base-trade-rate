@@ -267,7 +267,8 @@ describe('splitTrade with options', (): void => {
         tradeYield.value()
       );
     },
-    // Civilization II's `city_split_trade` (OpenCiv2 `src/auto/city.cpp:9682`), with rates in tenths: luxuries
+    // Civilization II's `city_split_trade` (OpenCiv2 `src/auto/city.cpp`,
+    //  richardpenman/civ2@49f26ec), with rates in tenths: luxuries
     //  `(trade × rate + 4) / 10`, science the same capped by what luxuries leave, and tax the rest. In percent, as
     //  whole numbers: `(trade × percent + 40) / 100`, truncated.
     civ2: SplitTradeOptions = {
@@ -276,7 +277,7 @@ describe('splitTrade with options', (): void => {
       lastTakesRemainder: true,
     };
 
-  // [luxuries, science, tax] in percent, trade, and what city.cpp:9682 gives, worked out by hand.
+  // [luxuries, science, tax] in percent, trade, and what `city_split_trade` gives, worked out by hand.
   (
     [
       [[0, 50, 50], 1, [0, 0, 1]],
