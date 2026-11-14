@@ -13,7 +13,7 @@ import addPlayerTradeRates from '../lib/playerTradeRates';
 import adjustTradeRates from '../lib/adjustTradeRates';
 import { expect } from 'chai';
 import processTradeRateYields from '../lib/processTradeRateYields';
-import splitTrade from '../lib/splitTrade';
+import splitTrade, { SplitTradeOptions } from '../lib/splitTrade';
 
 class Income extends Yield {}
 class Drain extends Income {
@@ -234,6 +234,95 @@ describe('splitTrade', (): void => {
         playerTradeRatesRegistry
       )(cityOf(other), [new Income(6)]).map((tradeYield) => tradeYield.value())
     ).to.deep.equal([6, 0, 0]);
+  });
+});
+
+describe('splitTrade with options', (): void => {
+  const setUpSplit = (values: [number, number, number]) =>
+      setUp(
+        () => [
+          new FirstRate(values[0]),
+          new SecondRate(values[1]),
+          new ThirdRate(values[2]),
+        ],
+        FirstRate,
+        SecondRate,
+        ThirdRate
+      ),
+    split = (
+      values: [number, number, number],
+      trade: number,
+      options: SplitTradeOptions
+    ): number[] => {
+      const { availableTradeRateRegistry, player, playerTradeRatesRegistry } =
+        setUpSplit(values);
+
+      return splitTrade(
+        Income,
+        Math.ceil,
+        availableTradeRateRegistry,
+        playerTradeRatesRegistry,
+        options
+      )(cityOf(player), [new Income(trade)]).map((tradeYield) =>
+        tradeYield.value()
+      );
+    },
+    // Civilization II's `city_split_trade` (OpenCiv2 `src/auto/city.cpp:9682`), with rates in tenths: luxuries
+    //  `(trade × rate + 4) / 10`, science the same capped by what luxuries leave, and tax the rest. In percent, as
+    //  whole numbers: `(trade × percent + 40) / 100`, truncated.
+    civ2: SplitTradeOptions = {
+      share: (total: number, percent: number): number =>
+        Math.floor((total * percent + 40) / 100),
+      lastTakesRemainder: true,
+    };
+
+  // [luxuries, science, tax] in percent, trade, and what city.cpp:9682 gives, worked out by hand.
+  (
+    [
+      [[0, 50, 50], 1, [0, 0, 1]],
+      [[30, 30, 40], 12, [4, 4, 4]],
+      [[30, 30, 40], 7, [2, 2, 3]],
+      [[10, 10, 80], 5, [0, 0, 5]],
+      [[0, 60, 40], 15, [0, 9, 6]],
+      [[10, 30, 60], 15, [1, 4, 10]],
+      [[10, 40, 50], 1, [0, 0, 1]],
+      [[20, 40, 40], 13, [3, 5, 5]],
+      [[50, 50, 0], 9, [4, 4, 1]],
+      [[50, 50, 0], 6, [3, 3, 0]],
+      [[100, 0, 0], 25, [25, 0, 0]],
+      [[0, 100, 0], 3, [0, 3, 0]],
+      [[0, 0, 100], 4, [0, 0, 4]],
+      [[30, 30, 40], 0, [0, 0, 0]],
+    ] as [[number, number, number], number, number[]][]
+  ).forEach(([values, trade, expected]) =>
+    it(`splits ${trade} at ${values.join('/')} as Civ2 does: ${expected.join(
+      '/'
+    )}`, (): void => {
+      expect(split(values, trade, civ2)).to.deep.equal(expected);
+    })
+  );
+
+  it('works out a share in integers, where the fractional share would round the wrong way', (): void => {
+    // 12 × 0.3 is 3.5999999999999996 in floating point, so `Math.floor(share + 0.4)` would give 3, not 4.
+    expect(Math.floor(12 * 0.3 + 0.4)).equal(3);
+    expect(split([30, 30, 40], 12, civ2)).to.deep.equal([4, 4, 4]);
+  });
+
+  it('gives the last rate what is left only when asked', (): void => {
+    const share = (total: number, percent: number): number =>
+      Math.floor((total * percent) / 100);
+
+    expect(split([10, 10, 80], 5, { share })).to.deep.equal([0, 0, 4]);
+    expect(
+      split([10, 10, 80], 5, { share, lastTakesRemainder: true })
+    ).to.deep.equal([0, 0, 5]);
+    expect(split([10, 10, 80], 5, { lastTakesRemainder: true })).to.deep.equal([
+      1, 1, 3,
+    ]);
+  });
+
+  it('splits as before with no options', (): void => {
+    expect(split([30, 30, 40], 11, {})).to.deep.equal([4, 4, 3]);
   });
 });
 

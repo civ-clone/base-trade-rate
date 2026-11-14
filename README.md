@@ -7,7 +7,9 @@ The wiring that turns a city's trade into its player's trade-rate yields, for a 
   `TradeRate`, in the order they're available, each at the value of the first default it is an instance of (0 when
   there is none), and registers them.
 - `lib/splitTrade`: `splitTrade(TradeYield, round, …)`, a city `Yield` effect that splits the city's trade (never below
-  0) between its player's rates in rate order, `round`ing each share and capping it by what is left.
+  0) between its player's rates in rate order, `round`ing each share and capping it by what is left. Its last argument, `{ share, lastTakesRemainder }`, is for a
+  ruleset that splits differently: `share(total, percent)` works out each share in its own arithmetic, and with
+  `lastTakesRemainder` the last rate takes whatever the others leave (Civilization II's tax).
 - `lib/adjustTradeRates`: `adjustTradeRates(…)`, a player `Action` effect offering `AdjustTradeRates` for the player's
   own rates.
 - `lib/processTradeRateYields`: `processTradeRateYields(cache, …)`, a player `TurnStart` effect that consolidates each
