@@ -33,7 +33,7 @@
     "@civ-clone/core-player": "^0.1.10",
     "@civ-clone/core-registry": "^0.1.6",
     "@civ-clone/core-rule": "^0.1.9",
-    "@civ-clone/core-trade-rate": "^0.1.6",
+    "@civ-clone/core-trade-rate": "^0.1.7",
     "@civ-clone/core-yield": "^0.1.6"
   }
 }

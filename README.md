@@ -5,7 +5,8 @@ The wiring that turns a city's trade into its player's trade-rate yields, for a 
 
 - `lib/playerTradeRates`: `addPlayerTradeRates(player, defaultRates, …)` gives a player one of each available
   `TradeRate`, in the order they're available, each at the value of the first default it is an instance of (0 when
-  there is none), and registers them.
+  there is none), and registers them. A ruleset passes its game's `RuleRegistry` last, so the rates ask that game's
+  `MaxRate` and `ExcessRate` rules (`core-trade-rate`).
 - `lib/splitTrade`: `splitTrade(TradeYield, round, …)`, a city `Yield` effect that splits the city's trade (never below
   0) between its player's rates in rate order, `round`ing each share and capping it by what is left. Its last argument, `{ share, lastTakesRemainder }`, is for a
   ruleset that splits differently: `share(total, percent)` works out each share in its own arithmetic, and with

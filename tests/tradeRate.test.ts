@@ -3,6 +3,7 @@ import AvailableTradeRateRegistry from '@civ-clone/core-trade-rate/AvailableTrad
 import City from '@civ-clone/core-city/City';
 import CityRegistry from '@civ-clone/core-city/CityRegistry';
 import Effect from '@civ-clone/core-rule/Effect';
+import MaxRate from '@civ-clone/core-trade-rate/Rules/MaxRate';
 import Player from '@civ-clone/core-player/Player';
 import PlayerTradeRatesRegistry from '@civ-clone/core-trade-rate/PlayerTradeRatesRegistry';
 import ProcessYield from '@civ-clone/core-city/Rules/ProcessYield';
@@ -120,6 +121,64 @@ describe('addPlayerTradeRates', (): void => {
     expect(rates(playerTradeRatesRegistry, player)).to.deep.equal([
       ['FirstRate', 0],
     ]);
+  });
+});
+
+describe('addPlayerTradeRates with a rule registry', (): void => {
+  const withRules = (
+    ruleRegistry?: RuleRegistry
+  ): { player: Player; playerTradeRatesRegistry: PlayerTradeRatesRegistry } => {
+    const availableTradeRateRegistry = new AvailableTradeRateRegistry(),
+      playerTradeRatesRegistry = new PlayerTradeRatesRegistry(),
+      player = new Player(new RuleRegistry());
+
+    availableTradeRateRegistry.register(FirstRate, SecondRate);
+
+    addPlayerTradeRates(
+      player,
+      [new FirstRate(70), new SecondRate(30)],
+      availableTradeRateRegistry,
+      playerTradeRatesRegistry,
+      ruleRegistry
+    );
+
+    return { player, playerTradeRatesRegistry };
+  };
+
+  it("makes the player's rates ask that registry's MaxRate rules", (): void => {
+    const ruleRegistry = new RuleRegistry();
+
+    ruleRegistry.register(
+      new MaxRate(
+        new Effect((player: Player, rate: TradeRate): number | undefined =>
+          rate instanceof FirstRate ? 0.6 : undefined
+        )
+      )
+    );
+
+    const { player, playerTradeRatesRegistry } = withRules(ruleRegistry),
+      playerTradeRates = playerTradeRatesRegistry.getByPlayer(player);
+
+    expect(playerTradeRates.maxRate(FirstRate)).to.equal(0.6);
+    expect(playerTradeRates.maxRate(SecondRate)).undefined;
+
+    playerTradeRates.set(FirstRate, 90);
+
+    expect(rates(playerTradeRatesRegistry, player)).to.deep.equal([
+      ['FirstRate', 60],
+      ['SecondRate', 40],
+    ]);
+  });
+
+  it('leaves the rates at their defaults, and asks no other registry, without one', (): void => {
+    const { player, playerTradeRatesRegistry } = withRules();
+
+    expect(rates(playerTradeRatesRegistry, player)).to.deep.equal([
+      ['FirstRate', 70],
+      ['SecondRate', 30],
+    ]);
+    expect(playerTradeRatesRegistry.getByPlayer(player).maxRate(FirstRate))
+      .undefined;
   });
 });
 
